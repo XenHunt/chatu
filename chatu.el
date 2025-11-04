@@ -167,18 +167,18 @@
 (defun chatu-get-input (line)
   "Get chatu input file from string LINE."
   (when (string-match
-           (concat ":\\w* +" chatu-file-regex) line)
-      (list :input
-            (substring-no-properties
-             (match-string 1 line)))))
+         (concat ":\\w* +" chatu-file-regex) line)
+    (list :input
+          (substring-no-properties
+           (match-string 1 line)))))
 
 (defun chatu-get-output (line)
   "Get chatu output file from string LINE."
   (when (string-match
-           (concat ":output +" chatu-file-regex) line)
-      (list :output
-            (substring-no-properties
-             (match-string 1 line)))))
+         (concat ":output +" chatu-file-regex) line)
+    (list :output
+          (substring-no-properties
+           (match-string 1 line)))))
 
 (defun chatu-get-output-ext (line)
   "Get chatu output file extension from string LINE."
@@ -191,18 +191,18 @@
 (defun chatu-get-input-dir (line)
   "Get chatu output directory from string LINE."
   (when (string-match
-           (concat ":input-dir +" chatu-dir-regex) line)
-      (list :input-dir
-            (substring-no-properties
-             (match-string 1 line)))))
+         (concat ":input-dir +" chatu-dir-regex) line)
+    (list :input-dir
+          (substring-no-properties
+           (match-string 1 line)))))
 
 (defun chatu-get-output-dir (line)
   "Get chatu input directory from string LINE."
   (when (string-match
-           (concat ":output-dir +" chatu-dir-regex) line)
-      (list :output-dir
-            (substring-no-properties
-             (match-string 1 line)))))
+         (concat ":output-dir +" chatu-dir-regex) line)
+    (list :output-dir
+          (substring-no-properties
+           (match-string 1 line)))))
 
 (defun chatu-get-page (line)
   "Get chatu output page from string LINE."
@@ -219,56 +219,56 @@
            (match-string 1 line)))))
 
 (defvar chatu-keyword-value-functions
-      '(chatu-get-keyword
-        chatu-get-settings
-        chatu-get-type
-        chatu-get-input
-        chatu-get-output
-        chatu-get-page
-        chatu-get-input-dir
-        chatu-get-output-dir
-        chatu-get-script
-        chatu-get-output-ext))
+  '(chatu-get-keyword
+    chatu-get-settings
+    chatu-get-type
+    chatu-get-input
+    chatu-get-output
+    chatu-get-page
+    chatu-get-input-dir
+    chatu-get-output-dir
+    chatu-get-script
+    chatu-get-output-ext))
 
 (defun chatu-normalize-keyword-plist (keyword-plist)
   "Normalize KEYWORD-PLIST."
   (when (plist-get keyword-plist :chatu)
-      (let* ((input (plist-get keyword-plist :input))
-             (input-dir (or (plist-get keyword-plist :input-dir)
-                            ;; if input already contains parent folder
-                            ;; ignore `chatu-input-dir'
-                            (if (file-name-directory input)
-                                nil
-                              chatu-input-dir)))
-             (_ (plist-put keyword-plist :input-path
-                           (if input-dir
-                               (concat input-dir "/" input)
-                             input)))
-             (output-ext (or (plist-get keyword-plist :output-ext)
-                             chatu-output-ext))
-             (_ (plist-put keyword-plist :output-ext output-ext))
-             (output (plist-get keyword-plist :output))
-             (output-dir (or (plist-get keyword-plist :output-dir)
-                            ;; if output already contains parent folder
-                            ;; ignore `chatu-output-dir'
-                             (if (and output (file-name-directory output))
-                                 nil
-                               chatu-output-dir)))
-             (page (plist-get keyword-plist :page))
-             (output (or output
-                         (if page
-                             (concat (file-name-sans-extension
-                                      ;; remove input's parent folder
-                                      (file-name-base input))
-                                     "-" page "." output-ext)
-                           (file-name-with-extension
-                            (file-name-base input)
-                            output-ext))))
-             (_ (plist-put keyword-plist :output-path
-                           (if output-dir
-                               (concat output-dir "/" output)
-                             output))))
-        keyword-plist)))
+    (let* ((input (plist-get keyword-plist :input))
+           (input-dir (or (plist-get keyword-plist :input-dir)
+                          ;; if input already contains parent folder
+                          ;; ignore `chatu-input-dir'
+                          (if (file-name-directory input)
+                              nil
+                            chatu-input-dir)))
+           (_ (plist-put keyword-plist :input-path
+                         (if input-dir
+                             (concat input-dir "/" input)
+                           input)))
+           (output-ext (or (plist-get keyword-plist :output-ext)
+                           chatu-output-ext))
+           (_ (plist-put keyword-plist :output-ext output-ext))
+           (output (plist-get keyword-plist :output))
+           (output-dir (or (plist-get keyword-plist :output-dir)
+                           ;; if output already contains parent folder
+                           ;; ignore `chatu-output-dir'
+                           (if (and output (file-name-directory output))
+                               nil
+                             chatu-output-dir)))
+           (page (plist-get keyword-plist :page))
+           (output (or output
+                       (if page
+                           (concat (file-name-sans-extension
+                                    ;; remove input's parent folder
+                                    (file-name-base input))
+                                   "-" page "." output-ext)
+                         (file-name-with-extension
+                          (file-name-base input)
+                          output-ext))))
+           (_ (plist-put keyword-plist :output-path
+                         (if output-dir
+                             (concat output-dir "/" output)
+                           output))))
+      keyword-plist)))
 
 (defun chatu-keyword-plist ()
   "Get normalized KEYWORD-PLIST from string line."
@@ -340,7 +340,9 @@
            (type (downcase
                   (plist-get keyword-plist :type)))
            (script (progn
+                     (message "DEBUG: chatu-add - before require")
                      (require (intern (concat "chatu-" type)))
+                     (message "DEBUG: chatu-add - after require")
                      (funcall (intern (concat "chatu-" type "-script"))
                               keyword-plist)))
            ;; ~ is after `shell-quote-argument' is \~, which is not
@@ -357,16 +359,22 @@
                          (buffer-substring
                           (line-beginning-position)
                           (line-end-position)))))
-           ;; ensure output-dir exists.
+      ;; ensure output-dir exists.
+      (message "DEBUG: chatu-add - before make-directory")
       (when (not (file-exists-p result-dir))
         (make-directory result-dir t))
+      (message "DEBUG: chatu-add - after make-directory")
       (forward-line)
       (chatu-skip-lines)
+      (message "DEBUG: chatu-add - before start-process")
       (let ((process (start-process-shell-command "chatu-buffer" nil script)))
+        (message "DEBUG: chatu-add - after start-process")
         (set-process-sentinel
          process `(lambda (process event)
+                    (message "DEBUG: chatu-add - sentinel called")
                     ;; refresh image
                     (chatu-refresh-image))))
+      (message "DEBUG: chatu-add - process started")
       (if (string-prefix-p (chatu-img-pre)
                            (string-trim
                             (buffer-substring

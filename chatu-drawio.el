@@ -42,16 +42,18 @@
   :group 'chatu
   :type 'string)
 
+
 (defun chatu-drawio--find-executable ()
   "Find the drawio executable on PATH, or else return an error."
   (condition-case nil
-      (file-truename (or (executable-find "draw.io")
-                         ;; for wsl emacs to find windows draw.io.exe
-                         (executable-find "draw.io.exe")
-                         ;; drawio on gentoo
-                         (executable-find "drawio")))
+      (let ((executable (or (executable-find "draw.io")
+                            (executable-find "draw.io.exe")
+                            (executable-find "drawio"))))
+        (message "Found drawio executable at: %s" executable)
+        (file-truename executable))
     (wrong-type-argument
-     (message "Cannot find the draw.io executable on the PATH."))))
+     (message "Cannot find the draw.io executable on the PATH.")
+     nil)))
 
 (defun chatu-drawio-script (keyword-plist)
   "Get conversion script.
@@ -72,6 +74,14 @@ KEYWORD-PLIST contains parameters from the chatu line."
                (shell-command-to-string
                 (format "wslpath -aw '%s'" (file-truename input-path))))
             input-path)))
+    (message "DEBUG: drawio-script - input-path: %s" input-path)
+    (message "DEBUG: drawio-script - output-ext: %s" output-ext)
+    (message "DEBUG: drawio-script - output-path: %s" output-path)
+    (message "DEBUG: drawio-script - drawio-path: %s" drawio-path)
+    (if (not (file-exists-p input-path))
+        (progn
+          (message "Input file does not exist: %s, have you tried to open it?" input-path)
+          (error "Input file does not exist")))
     (if output-ext
         (format "%s %s -f %s -x %s -p %s -o %s"
                 drawio-path
@@ -103,9 +113,12 @@ KEYWORD-PLIST contains parameters from the chatu line."
   "Open .drawio file.
 KEYWORD-PLIST contains parameters from the chatu line."
   (interactive)
+  (message "DEBUG: drawio-open - starting")
   (let* ((input-path (plist-get keyword-plist :input-path))
          (input-path (file-truename (chatu-common-with-extension input-path "drawio")))
          (drawio-path (shell-quote-argument (funcall chatu-drawio-executable-func))))
+    (message "DEBUG: drawio-open - input-path: %s" input-path)
+    (message "DEBUG: drawio-open - drawio-path: %s" drawio-path)
     (chatu-common-open-external drawio-path input-path chatu-drawio-empty)))
 
 (provide 'chatu-drawio)
